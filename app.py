@@ -965,12 +965,12 @@ def _download_auto_subtitles(
 ) -> None:
     """Fetch translated or auto-generated subtitles without re-downloading the video."""
 
-    command = ["yt-dlp"]
+    command = ["yt-dlp", "--ignore-config"]
 
     if subtitle_request.cookie_path:
         command += ["--cookies", subtitle_request.cookie_path]
 
-    command += ["--extractor-args"]
+    command += ["--extractor-args", "youtube:player_client=tv,android_vr"]
     command += ["--skip-download"]
     command += ["--write-subs"]
     command += ["--write-auto-subs"]
@@ -3020,7 +3020,25 @@ def process_download_job(
             target_template = os.path.join(download_dir, f"{template_base}.%(ext)s")
             expected_pattern = os.path.join(download_dir, f"{download_filename_base}.*")
 
-        command = ["yt-dlp", yt_url]
+        command = ["yt-dlp", "--ignore-config"]
+        if cookie_path:
+            command += ["--cookies", cookie_path]
+        command += ["--js-runtimes", "deno"]
+        command += ["--newline"]
+        command += ["-f"]
+        if merge_playlist:
+            command.append("--yes-playlist")
+        else:
+            command.append("--no-playlist")
+        if subtitles_enabled:
+            if subtitle_mode == "official":
+                command += ["--write-subs"]
+            elif subtitle_mode == "auto":
+                command += ["--write-auto-subs"]
+            command += ["--convert-subs", "srt"]
+            if selected_subtitles_langs:
+                command += ["--sub-langs", selected_subtitles_langs]
+        command += ["-o", target_template, yt_url]
 
         log("Running yt-dlp with explicit output template.")
 
