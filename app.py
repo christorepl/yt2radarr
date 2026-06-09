@@ -2600,6 +2600,7 @@ def process_download_job(
             )
 
         progress_pattern = re.compile(r"(\d{1,3}(?:\.\d+)?)%")
+        #format_selector = YTDLP_FORMAT_SELECTOR
 
         info_command = ["yt-dlp", "--ignore-config"]
         if cookie_path:
@@ -2607,6 +2608,7 @@ def process_download_job(
         info_command += ["--js-runtimes", "deno"]
         info_command += [
             "-f",
+            #format_selector,
             "--skip-download",
         ]
         if merge_playlist:
